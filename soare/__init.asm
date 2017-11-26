@@ -136,11 +136,12 @@ gMultiBootEntryPoint:
     call __magic
 
     ; temporary ESP, just below code
-    mov     esp, KERNEL_BASE_PHYSICAL
+    mov esp, stack_top
+
+    ;lidt [IDT]
 
     call set_up_page_tables
 
-    call __magic
     ; set address of P4 table into cr3
     mov eax, PML4T
     mov cr3, eax
@@ -167,6 +168,14 @@ gMultiBootEntryPoint:
 
     [bits 64]
     longMode:
+        mov ax, 0
+        mov ss, ax
+        mov ds, ax
+        mov es, ax
+        mov fs, ax
+        mov gs, ax
+        mov dword [0xb8000], 0x2f4b2f4f ; print 'OK'
+        hlt                           ; Halt the processor.
         call EntryPoint
 
 	;mov DWORD [0x000B80FC], ' 0#0'
@@ -177,30 +186,38 @@ gMultiBootEntryPoint:
     cli
     hlt
 
+[bits 32]
 set_up_page_tables:
+    mov eax, PML4T
+    or eax, 0b11 ; present + writable
+    mov [PML4T + 511 * 8], eax
+
     ; map first P4 entry to P3 table
     mov eax, PDPT
-    or eax, 0x3 ; present + writable
+    or eax, 0b11 ; present + writable
     mov [PML4T], eax
 
     ; map first P3 entry to P2 table
     mov eax, PDT
-    or eax, 0x3 ; present + writable
+    or eax, 0x3        ; present + writable
+    mov ecx, 512
+loop_p3:
+    mov [PDPT + ecx * 8], eax
+    loop loop_p3
     mov [PDPT], eax
 
     ; map each P2 entry to a huge 2MiB page
     mov ecx, 0         ; counter variable
-
 .map_p2_table:
     ; map ecx-th P2 entry to a huge page that starts at address 2MiB*ecx
     mov eax, 0x200000  ; 2MiB
     mul ecx            ; start address of ecx-th page
-    or eax, 0x83 ; present + writable + huge
+    or eax, 0x83       ; huge + present + writable
     mov [PDT + ecx * 8], eax ; map ecx-th entry
 
-    inc ecx            ; increase counter
-    cmp ecx, 512       ; if counter == 512, the whole P2 table is mapped
-    jne .map_p2_table  ; else map the next entry
+    inc ecx
+    cmp ecx, 512
+    jne .map_p2_table
 
     ret
 
@@ -248,3 +265,15 @@ PDPT:
    resb 4096
 PDT:
    resb 4096
+stack_bottom:
+   resb 64
+stack_top:
+
+section .rodata
+gdt64:
+    dq 0 ; zero entry
+.Code: equ $ - gdt64 ; new
+    dq (1<<44) | (1<<47) | (1<<43) | (1<<53) ; code segment
+.Pointer:
+    dw $ - gdt64 - 1
+    dq gdt64
