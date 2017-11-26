@@ -1,5 +1,5 @@
 segment .text
-[BITS 32]
+[bits 32]
 
 ;;
 ;; import / export entries between .nasm and .c parts
@@ -13,7 +13,6 @@ extern EntryPoint                   ; import C entry point from main.c
 
 global gMultiBootHeader         ; export multiboot structures to .c
 global gMultiBootStruct
-
 
 ;;
 ;; we use hardcoded address space / map for our data structures, the multiboot header and the entry point
@@ -39,10 +38,11 @@ IA32_EFER                   equ 0xC0000080
 CR4_PAE                     equ 0x00000020
 IA23_EFER_LME               equ 0x100
 
+PML4_BASE equ 0x1000
+CR0_PE    equ 1 << 0
+CR0_PG    equ 1 << 31
 
 TOP_OF_STACK_VIRTUAL        equ KERNEL_BASE_VIRTUAL_64 + 0x10000
-
-
 
 ;;
 ;; KERNEL_BASE_PHYSICAL + 0x400
@@ -74,61 +74,141 @@ times (0x100 - MULTIBOOT_HEADER_SIZE - MULTIBOOT_INFO_STRUCT_SIZE - 0x40) db 0
 ;;
 ;; N.B. here we have plenty of space (over 60KB to be used to define various data structures needed, e.g. page tables)
 ;;
+GDT64:                           ; Global Descriptor Table (64-bit).
+    .Null: equ $ - GDT64         ; The null descriptor.
+    dw 0                         ; Limit (low).
+    dw 0                         ; Base (low).
+    db 0                         ; Base (middle)
+    db 0                         ; Access.
+    db 0                         ; Granularity.
+    db 0                         ; Base (high).
+    .Code: equ $ - GDT64         ; The code descriptor.
+    dw 0                         ; Limit (low).
+    dw 0                         ; Base (low).
+    db 0                         ; Base (middle)
+    db 10011010b                 ; Access (exec/read).
+    db 00100000b                 ; Granularity.
+    db 0                         ; Base (high).
+    .Data: equ $ - GDT64         ; The data descriptor.
+    dw 0                         ; Limit (low).
+    dw 0                         ; Base (low).
+    db 0                         ; Base (middle)
+    db 10010010b                 ; Access (read/write).
+    db 00000000b                 ; Granularity.
+    db 0                         ; Base (high).
+    .Pointer:                    ; The GDT-pointer.
+    dw $ - GDT64 - 1             ; Limit.
+    dq GDT64                     ; Base.
 
 ;;
 ;; KERNEL_BASE_PHYSICAL + 0x4C0
 ;;
 
-
 ;;
 ;; TOP-OF-STACK is KERNEL_BASE_PHYSICAL + 0x10000
 ;;
-
 
 ;;
 ;; N.B. multiboot starts in 32 bit PROTECTED MODE, without paging beeing enabled (FLAT); check out '3.2 Machine state' from docs
 ;; we explicitly allign the entry point to +64 KB (0x10000)
 ;;
 
-times 0x10000-0x400-$+gMultiBootHeader db 'G'           ; allignment
-
+times 0x10000 - 0x400 - $ + gMultiBootHeader db 'G'           ; allignment
 
 ;;
 ;; KERNEL_BASE_PHYSICAL + 0x10000
 ;;
-[BITS 32]
+[bits 32]
 gMultiBootEntryPoint:
     cli
 
     MOV     DWORD [0x000B8000], 'O1S1'
 %ifidn __OUTPUT_FORMAT__, win32
-    MOV     DWORD [0x000B8004], '3121'                  ; 32 bit build marker
+    MOV     DWORD [0x000B8004], '3121' ; 32 bit build marker
 %else
-    MOV     DWORD [0x000B8004], '6141'                  ; 64 bit build marker
+    MOV     DWORD [0x000B8004], '6141' ; 64 bit build marker
 %endif
 
-    ;; enable SSE instructions (CR4.OSFXSR = 1)
-    MOV     EAX, CR4
-    OR      EAX, 0x00000200
-    MOV     CR4, EAX
+    ; enable SSE instructions (CR4.OSFXSR = 1)
+    mov     eax, cr4
+    or      eax, 0x00000200
+    mov     cr4, eax
+    call __magic
 
-    MOV     ESP, KERNEL_BASE_PHYSICAL                   ; temporary ESP, just below code
-    
-    CALL EntryPoint
-    
-	MOV     DWORD [0x000B80FC], ' 0#0'
-    MOV     DWORD [0x000B8100], 'S0E0'       
-    MOV     DWORD [0x000B8104], 'C0U0'       
-    MOV     DWORD [0x000B8108], 'R0E0'
-    
-    CLI
-    HLT
+    ; temporary ESP, just below code
+    mov     esp, KERNEL_BASE_PHYSICAL
+
+    call set_up_page_tables
+
+    call __magic
+    ; set address of P4 table into cr3
+    mov eax, PML4T
+    mov cr3, eax
+
+    ; enable PAE
+    mov eax, cr4
+    or eax, CR4_PAE
+    mov cr4, eax
+
+    ; Set LM bit
+    mov ecx, 0xc0000080
+    rdmsr
+    or eax, IA23_EFER_LME
+    wrmsr
+
+    ; enable paging
+    mov eax, cr0
+    or eax, CR0_PG
+    mov cr0, eax
+
+    call __magic
+    lgdt [GDT64.Pointer]
+    jmp GDT64.Code:longMode
+
+    [bits 64]
+    longMode:
+        call EntryPoint
+
+	;mov DWORD [0x000B80FC], ' 0#0'
+    ;mov DWORD [0x000B8100], 'S0E0'
+    ;mov DWORD [0x000B8104], 'C0U0'
+    ;mov DWORD [0x000B8108], 'R0E0'
+
+    cli
+    hlt
+
+set_up_page_tables:
+    ; map first P4 entry to P3 table
+    mov eax, PDPT
+    or eax, 0x3 ; present + writable
+    mov [PML4T], eax
+
+    ; map first P3 entry to P2 table
+    mov eax, PDT
+    or eax, 0x3 ; present + writable
+    mov [PDPT], eax
+
+    ; map each P2 entry to a huge 2MiB page
+    mov ecx, 0         ; counter variable
+
+.map_p2_table:
+    ; map ecx-th P2 entry to a huge page that starts at address 2MiB*ecx
+    mov eax, 0x200000  ; 2MiB
+    mul ecx            ; start address of ecx-th page
+    or eax, 0x83 ; present + writable + huge
+    mov [PDT + ecx * 8], eax ; map ecx-th entry
+
+    inc ecx            ; increase counter
+    cmp ecx, 512       ; if counter == 512, the whole P2 table is mapped
+    jne .map_p2_table  ; else map the next entry
+
+    ret
 
 ;;--------------------------------------------------------
 ;; EXPORT TO C FUNCTIONS
 ;;--------------------------------------------------------
 
-;%ifidn __OUTPUT_FORMAT__, win32 ; win32 builds from Visual C decorate C names using _ 
+;%ifidn __OUTPUT_FORMAT__, win32 ; win32 builds from Visual C decorate C names using _
 ;global ___cli
 ;___cli equ __cli
 ;%else
@@ -137,27 +217,34 @@ gMultiBootEntryPoint:
 
 %macro EXPORT2C 1-*
 %rep  %0
-    %ifidn __OUTPUT_FORMAT__, win32 ; win32 builds from Visual C decorate C names using _ 
+    %ifidn __OUTPUT_FORMAT__, win32 ; win32 builds from Visual C decorate C names using _
     global _%1
     _%1 equ %1
     %else
     global %1
     %endif
-%rotate 1 
+%rotate 1
 %endrep
 %endmacro
 
 EXPORT2C __cli, __sti, __magic
-
 __cli:
-    CLI
-    RET
+    cli
+    ret
 
 __sti:
-    STI
-    RET
+    sti
+    ret
 
 __magic:
-    XCHG    BX,BX
-    RET
+    xchg bx, bx
+    ret
 
+section .bss
+align 4096
+PML4T:
+   resb 4096
+PDPT:
+   resb 4096
+PDT:
+   resb 4096

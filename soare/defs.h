@@ -29,7 +29,7 @@
 //
 // include SAL and VARARGS from Microsoft WDK
 //
-#include "shared\specstrings.h"
+//#include "shared\specstrings.h"
 //#include "crt\varargs.h"
 
 //

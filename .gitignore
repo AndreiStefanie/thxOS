@@ -7,6 +7,9 @@
 *.userosscache
 *.sln.docstates
 
+soare/soare.vcxproj
+soare/postbuild.cmd
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
