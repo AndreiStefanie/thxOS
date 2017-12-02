@@ -20,10 +20,11 @@ typedef struct _SCREEN
 void HelloBoot();
 
 void SetColor(BYTE Color);
+void SetScreenColor(BYTE Color);
 void ClearScreen();
 void PutChar(char C, int Pos);
 void PutString(char* String, int Pos);
 void PutStringLine(char* String, int Line);
-
+void welcome();
 
 #endif // _SCREEN_H_

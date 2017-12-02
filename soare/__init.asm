@@ -1,4 +1,4 @@
-segment .text
+section .text
 [bits 32]
 
 ;;
@@ -71,34 +71,20 @@ times MULTIBOOT_INFO_STRUCT_SIZE db 0                   ; check out '3.3 Boot in
 ;; leave 0x40 bytes for GDT stuff
 times (0x100 - MULTIBOOT_HEADER_SIZE - MULTIBOOT_INFO_STRUCT_SIZE - 0x40) db 0
 
-;;
-;; N.B. here we have plenty of space (over 60KB to be used to define various data structures needed, e.g. page tables)
-;;
-GDT64:                           ; Global Descriptor Table (64-bit).
-    .Null: equ $ - GDT64         ; The null descriptor.
-    dw 0                         ; Limit (low).
-    dw 0                         ; Base (low).
-    db 0                         ; Base (middle)
-    db 0                         ; Access.
-    db 0                         ; Granularity.
-    db 0                         ; Base (high).
-    .Code: equ $ - GDT64         ; The code descriptor.
-    dw 0                         ; Limit (low).
-    dw 0                         ; Base (low).
-    db 0                         ; Base (middle)
-    db 10011010b                 ; Access (exec/read).
-    db 00100000b                 ; Granularity.
-    db 0                         ; Base (high).
-    .Data: equ $ - GDT64         ; The data descriptor.
-    dw 0                         ; Limit (low).
-    dw 0                         ; Base (low).
-    db 0                         ; Base (middle)
-    db 10010010b                 ; Access (read/write).
-    db 00000000b                 ; Granularity.
-    db 0                         ; Base (high).
-    .Pointer:                    ; The GDT-pointer.
-    dw $ - GDT64 - 1             ; Limit.
-    dq GDT64                     ; Base.
+GDT64:
+    dq 0
+.Code: equ $ - GDT64
+    dq (1 << 44) | (1 << 47) | (1 << 43) | (1 << 53)
+.Pointer:
+    dw $ - GDT64 - 1
+    dq gdtBase
+	
+gdtBase equ 0x2004c0
+
+; Paging tables. Must be 4kb aligned
+p4_table equ 0x201000
+p3_table equ 0x202000
+p2_table equ 0x203000
 
 ;;
 ;; KERNEL_BASE_PHYSICAL + 0x4C0
@@ -133,17 +119,13 @@ gMultiBootEntryPoint:
     mov     eax, cr4
     or      eax, 0x00000200
     mov     cr4, eax
-    call __magic
 
-    ; temporary ESP, just below code
-    mov esp, stack_top
-
-    ;lidt [IDT]
+    mov esp, TOP_OF_STACK_VIRTUAL
 
     call set_up_page_tables
 
     ; set address of P4 table into cr3
-    mov eax, PML4T
+    mov eax, p4_table
     mov cr3, eax
 
     ; enable PAE
@@ -151,8 +133,8 @@ gMultiBootEntryPoint:
     or eax, CR4_PAE
     mov cr4, eax
 
-    ; Set LM bit
-    mov ecx, 0xc0000080
+    ; set LM bit
+    mov ecx, IA32_EFER
     rdmsr
     or eax, IA23_EFER_LME
     wrmsr
@@ -162,9 +144,8 @@ gMultiBootEntryPoint:
     or eax, CR0_PG
     mov cr0, eax
 
-    call __magic
-    lgdt [GDT64.Pointer]
-    jmp GDT64.Code:longMode
+	lgdt [0x2004d0]
+	jmp 0x08:0x210062
 
     [bits 64]
     longMode:
@@ -174,63 +155,67 @@ gMultiBootEntryPoint:
         mov es, ax
         mov fs, ax
         mov gs, ax
-        mov dword [0xb8000], 0x2f4b2f4f ; print 'OK'
-        hlt                           ; Halt the processor.
+		; print "OK"
+        mov dword [0xb8000], 0x2f4b2f4f
+		
         call EntryPoint
-
-	;mov DWORD [0x000B80FC], ' 0#0'
-    ;mov DWORD [0x000B8100], 'S0E0'
-    ;mov DWORD [0x000B8104], 'C0U0'
-    ;mov DWORD [0x000B8108], 'R0E0'
-
-    cli
-    hlt
+		
+	.os_returned:
+		call __magic
+		;print "OS returned!"
+		mov rax, 0x4f724f204f534f4f
+		mov [0xb8000], rax
+		mov rax, 0x4f724f754f744f65
+		mov [0xb8008], rax
+		mov rax, 0x4f214f644f654f6e
+		mov [0xb8010], rax
+		hlt
 
 [bits 32]
 set_up_page_tables:
-    mov eax, PML4T
-    or eax, 0b11 ; present + writable
-    mov [PML4T + 511 * 8], eax
+	; Clear page tables
+	mov edi, p4_table
+    mov cr3, edi
+    xor eax, eax
+    mov ecx, 3072
+    rep stosd
+    mov edi, cr3
 
-    ; map first P4 entry to P3 table
-    mov eax, PDPT
-    or eax, 0b11 ; present + writable
-    mov [PML4T], eax
+    ; map all p4 entries to first p3
+    mov eax, p3_table
+	or eax, 0x3 ; present + writable
+	mov ecx, 512
+loop_p4:
+    mov [p4_table + ecx * 8], eax
+	loop loop_p4
+    mov [p4_table], eax
 
-    ; map first P3 entry to P2 table
-    mov eax, PDT
-    or eax, 0x3        ; present + writable
+    ; map all p3 entries to first p2
+    mov eax, p2_table
+    or eax, 0x3 ; present + writable
     mov ecx, 512
 loop_p3:
-    mov [PDPT + ecx * 8], eax
+    mov [p3_table + ecx * 8], eax
     loop loop_p3
-    mov [PDPT], eax
+    mov [p3_table], eax
 
     ; map each P2 entry to a huge 2MiB page
     mov ecx, 0         ; counter variable
-.map_p2_table:
+.loop_p2:
     ; map ecx-th P2 entry to a huge page that starts at address 2MiB*ecx
     mov eax, 0x200000  ; 2MiB
     mul ecx            ; start address of ecx-th page
     or eax, 0x83       ; huge + present + writable
-    mov [PDT + ecx * 8], eax ; map ecx-th entry
-
+    mov [p2_table + ecx * 8], eax ; map ecx-th entry
     inc ecx
     cmp ecx, 512
-    jne .map_p2_table
+    jne .loop_p2
 
     ret
 
 ;;--------------------------------------------------------
 ;; EXPORT TO C FUNCTIONS
 ;;--------------------------------------------------------
-
-;%ifidn __OUTPUT_FORMAT__, win32 ; win32 builds from Visual C decorate C names using _
-;global ___cli
-;___cli equ __cli
-;%else
-;global __cli
-;%endif
 
 %macro EXPORT2C 1-*
 %rep  %0
@@ -256,24 +241,3 @@ __sti:
 __magic:
     xchg bx, bx
     ret
-
-section .bss
-align 4096
-PML4T:
-   resb 4096
-PDPT:
-   resb 4096
-PDT:
-   resb 4096
-stack_bottom:
-   resb 64
-stack_top:
-
-section .rodata
-gdt64:
-    dq 0 ; zero entry
-.Code: equ $ - gdt64 ; new
-    dq (1<<44) | (1<<47) | (1<<43) | (1<<53) ; code segment
-.Pointer:
-    dw $ - gdt64 - 1
-    dq gdt64
