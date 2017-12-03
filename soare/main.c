@@ -1,13 +1,11 @@
-﻿#include "boot.h"
-#include "screen.h"
+﻿#include "screen.h"
+#include "timer.h"
 
 void EntryPoint(void)
 {
 	ClearScreen();
-	
-	SetColor(10);
-	PutStringLine("Boot OK!", 4);
-	PutChar('a', 400);
+	SetColor(VGA_LIGHT_RED);
+	Welcome();
 
-	welcome();
+	//init_timer(100);
 }

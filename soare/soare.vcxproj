@@ -107,6 +107,7 @@
       <AdditionalIncludeDirectories>c:\Program Files (x86)\Windows Kits\8.1\include</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MinimalRebuild>false</MinimalRebuild>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -138,11 +139,11 @@
       <AdditionalIncludeDirectories>c:\Program Files (x86)\Windows Kits\8.1\include</AdditionalIncludeDirectories>
       <MinimalRebuild>false</MinimalRebuild>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <BaseAddress>0x200000000</BaseAddress>
       <EntryPointSymbol>EntryPoint</EntryPointSymbol>
       <SubSystem>Windows</SubSystem>
@@ -231,11 +232,15 @@
   <ItemGroup>
     <ClInclude Include="boot.h" />
     <ClInclude Include="defs.h" />
+    <ClInclude Include="isr.h" />
     <ClInclude Include="screen.h" />
+    <ClInclude Include="timer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="isr.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="screen.c" />
+    <ClCompile Include="timer.c" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="__init.asm">

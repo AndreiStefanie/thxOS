@@ -156,7 +156,7 @@ gMultiBootEntryPoint:
         mov fs, ax
         mov gs, ax
 		; print "OK"
-        mov dword [0xb8000], 0x2f4b2f4f
+        ;mov dword [0xb8000], 0x2f4b2f4f
 		
         call EntryPoint
 		
@@ -229,7 +229,7 @@ loop_p3:
 %endrep
 %endmacro
 
-EXPORT2C __cli, __sti, __magic
+EXPORT2C __cli, __sti, __magic, __outb
 __cli:
     cli
     ret
@@ -241,3 +241,9 @@ __sti:
 __magic:
     xchg bx, bx
     ret
+	
+__outb
+	pop dx
+	pop ax
+	out dx, al
+	ret

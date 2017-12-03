@@ -65,13 +65,12 @@ typedef struct _MULTIBOOT_INFO
 
 #pragma pack(pop)
 
-/// ...
-
 //
 // exported functions from __init.asm
 //
 void __cli(void);
 void __sti(void);
-void __magic(void);         // MAGIC breakpoint into BOCHS (XCHG BX,BX)
+void __magic(void);
+void __outb(uint16, uint8);
 
 #endif // _BOOT_H_

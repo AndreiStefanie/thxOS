@@ -1,24 +1,58 @@
 #include "screen.h"
 
-volatile BYTE color = 10;
+void incIndex(void);
+int itoa_cust(int i, char *buf);
 
-void HelloBoot()
+BYTE color = 0;
+uint16 indexX = 0;
+uint16 indexY = 0;
+
+void PutChar(char C, int Pos)
 {
-	int i, len;
-	char boot[] = "Boot OK!\0";
-	color = 10;
+	char *vidMem = (char *) 0xb8000;
 
-	len = 0;
-	while (boot[len] != 0)
+	vidMem[Pos * 2] = C;
+	vidMem[Pos * 2 + 1] = color;
+}
+
+void PutCharAt(char C, int X, int Y)
+{
+	PutChar(C, Y * MAX_COLUMNS + X);
+}
+
+void PrintChar(char C, BYTE Color)
+{
+	BYTE color_temp = color;
+	SetColor(Color);
+	PutCharAt(C, indexX, indexY);
+	incIndex();
+	SetColor(color_temp);
+}
+
+void incIndex()
+{
+	if (indexX == MAX_COLUMNS - 1)
 	{
-		len++;
+		indexX = 0;
+		if (indexY == MAX_LINES - 1)
+		{
+			ClearScreen();
+			indexY = 0;
+		}
+		else
+			indexY++;
 	}
+	else
+		indexX++;
+}
 
-	PutChar('a', 100);
-
-	for (i = 0; (i < len) && (i < MAX_OFFSET); i++)
+void PutInt(int I, int Pos)
+{
+	char buf[10];
+	int len = itoa_cust(I, buf);
+	for (int i = 0; i < len; i++)
 	{
-		PutChar('a', i + 100);
+		PutChar(buf[i], Pos + i);
 	}
 }
 
@@ -30,11 +64,11 @@ void SetColor(BYTE Color)
 void SetScreenColor(BYTE Color)
 {
 	int i = 0;
-	PSCREEN vidMem = (PSCREEN)(0x000B8000);
+	char *vidMem = (char *)0xb8000;
 
 	for (i = 0; i < MAX_OFFSET; i++)
 	{
-		vidMem[i].color = Color;
+		vidMem[i * 2 + 1] = Color;
 	}
 }
 
@@ -52,13 +86,6 @@ void ClearScreen()
 	color = color_temp;
 }
 
-void PutChar(char C, int Pos)
-{
-	PSCREEN vidMem = (PSCREEN)(0x000B8000);
-	vidMem[Pos].color = color;
-	vidMem[Pos].c = C;
-}
-
 void PutString(char *String, int Pos)
 {
 	for (int i = 0; (String[i] != 0) && (i < MAX_OFFSET); i++)
@@ -72,12 +99,43 @@ void PutStringLine(char *String, int Line)
 	PutString(String, Line * MAX_COLUMNS);
 }
 
-void welcome()
+void Welcome()
 {
-	PutStringLine("   _____                         ____   _____ ", 5);
-	PutStringLine("  / ____|                       / __ \\ / ____|", 6);
-	PutStringLine(" | (___   ___   __ _ _ __ ___  | |  | | (___  ", 7);
-	PutStringLine("  \\___ \\ / _ \\ / _` | '__/ _ \\ | |  | |\\___ \\ ", 8);
-	PutStringLine("  ____) | (_) | (_| | | |  __/ | |__| |____) |", 9);
-	PutStringLine(" |_____/ \\___/ \\__,_|_|  \\___|  \\____/|_____/ ", 10);
+	int line = 1;
+	
+	PutStringLine("   _____                         ____   _____ ", line);
+	PutStringLine("  / ____|                       / __ \\ / ____|", line + 1);
+	PutStringLine(" | (___   ___   __ _ _ __ ___  | |  | | (___  ", line + 2);
+	PutStringLine("  \\___ \\ / _ \\ / _` | '__/ _ \\ | |  | |\\___ \\ ", line + 3);
+	PutStringLine("  ____) | (_) | (_| | | |  __/ | |__| |____) |", line + 4);
+	PutStringLine(" |_____/ \\___/ \\__,_|_|  \\___|  \\____/|_____/ ", line + 5);
+}
+
+int itoa_cust(int i, char *buf) 
+{
+	char const digit[] = "0123456789";
+	int shifter = 0;
+	int digits = 0;
+
+	if (i < 0)
+	{
+		*buf++ = '-';
+		i *= -1;
+	}
+
+	shifter = i;
+	do {
+		buf++;
+		shifter = shifter / 10;
+		digits++;
+	} while (shifter);
+
+	*buf = '\0';
+
+	do {
+		*--buf = digit[i % 10];
+		i = i / 10;
+	} while (i);
+
+	return digits;
 }

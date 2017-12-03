@@ -45,16 +45,45 @@
 //
 // default types
 //
-typedef unsigned __int8     BYTE, *PBYTE;
-typedef unsigned __int16    WORD, *PWORD;
-typedef unsigned __int32    DWORD, *PDWORD;
-typedef unsigned __int64    QWORD, *PQWORD;
-typedef signed __int8       INT8;
-typedef signed __int16      INT16;
-typedef signed __int32      INT32;
-typedef signed __int64      INT64;
+typedef unsigned __int8    BYTE, *PBYTE;
+typedef unsigned __int16   WORD, *PWORD;
+typedef unsigned __int32   DWORD, *PDWORD;
+typedef unsigned __int64   QWORD, *PQWORD;
+typedef signed __int8      INT8;
+typedef signed __int16     INT16;
+typedef signed __int32     INT32;
+typedef signed __int64     INT64;
 
+typedef signed char		   int8;
+typedef unsigned char	   uint8;
+typedef signed short	   int16;
+typedef unsigned short	   uint16;
+typedef signed int		   int32;
+typedef unsigned int	   uint32;
+typedef signed long long   int64;
+typedef unsigned long long uint64;
 
+typedef _Bool bool;
+
+//
+// VGA Colors
+//
+#define VGA_BLACK 0
+#define VGA_BLUE 1
+#define VGA_GREEN 2
+#define VGA_CYAN 3
+#define VGA_RED 4
+#define VGA_MAGENTA 5
+#define VGA_BROWN 6
+#define VGA_LIGHT_GREY 7
+#define VGA_DARK_GREY 8
+#define VGA_LIGHT_BLUE 9
+#define VGA_LIGHT_GREEN 10
+#define VGA_LIGHT_CYAN 11
+#define VGA_LIGHT_RED 12
+#define VGA_LIGHT_MAGENTA 13
+#define VGA_LIGHT_BROWN 14
+#define VGA_WHITE 15
 //
 // frequently used definitions
 //
@@ -66,5 +95,12 @@ typedef signed __int64      INT64;
 
 #define MIN(x, y)           (((x) < (y)) ? (x) : (y))
 #define MAX(x, y)           (((x) > (y)) ? (x) : (y))
+
+#define true 1
+#define false 0
+
+#define NULL 0
+
+#define UNUSED(x) (void)(x)
 
 #endif // _DEFS_H_
