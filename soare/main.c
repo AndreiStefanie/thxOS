@@ -7,5 +7,6 @@ void EntryPoint(void)
 	SetColor(VGA_LIGHT_RED);
 	Welcome();
 
-	//init_timer(100);
+	__magic();
+	init_timer(100);
 }

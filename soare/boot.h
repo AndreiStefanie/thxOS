@@ -71,6 +71,6 @@ typedef struct _MULTIBOOT_INFO
 void __cli(void);
 void __sti(void);
 void __magic(void);
-void __outb(uint16, uint8);
+void __cdecl __outb(uint16, uint8);
 
 #endif // _BOOT_H_

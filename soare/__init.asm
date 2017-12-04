@@ -243,7 +243,10 @@ __magic:
     ret
 	
 __outb
-	pop dx
-	pop ax
+	mov ax, cx
 	out dx, al
+	ret
+
+__inb
+	in al, dx
 	ret
