@@ -1,6 +1,6 @@
 ﻿#include "screen.h"
-#include "timer.h"
-#include "pic.h"
+#include "interrupts/timer.h"
+#include "interrupts/pic.h"
 
 void EntryPoint(void)
 {

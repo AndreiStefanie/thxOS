@@ -230,22 +230,24 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="boot.h" />
-    <ClInclude Include="defs.h" />
-    <ClInclude Include="isr.h" />
-    <ClInclude Include="pic.h" />
-    <ClInclude Include="screen.h" />
-    <ClInclude Include="timer.h" />
+    <ClInclude Include="kernel\boot.h" />
+    <ClInclude Include="kernel\defs.h" />
+    <ClInclude Include="kernel\interrupts\idt.h" />
+    <ClInclude Include="kernel\interrupts\isr.h" />
+    <ClInclude Include="kernel\interrupts\pic.h" />
+    <ClInclude Include="kernel\screen.h" />
+    <ClInclude Include="kernel\interrupts\timer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="isr.c" />
-    <ClCompile Include="main.c" />
-    <ClCompile Include="pic.c" />
-    <ClCompile Include="screen.c" />
-    <ClCompile Include="timer.c" />
+    <ClCompile Include="kernel\interrupts\idt.c" />
+    <ClCompile Include="kernel\interrupts\isr.c" />
+    <ClCompile Include="kernel\main.c" />
+    <ClCompile Include="kernel\interrupts\pic.c" />
+    <ClCompile Include="kernel\screen.c" />
+    <ClCompile Include="kernel\interrupts\timer.c" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="__init.asm">
+    <CustomBuild Include="kernel\__init.asm">
       <FileType>Document</FileType>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Assemblying %(Filename)%(Extension) ...</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Assemblying %(Filename)%(Extension) ...</Message>
