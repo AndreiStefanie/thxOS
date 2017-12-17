@@ -2,24 +2,24 @@
 #include "isr.h"
 #include "boot.h"
 
-uint32 tick = 0;
-uint32 freq = 0;
+volatile uint32 tick = 0;
+volatile uint32 freq = 0;
 
 static void timer_callback()
 {
 	tick++;
 }
 
-void waitTicks(uint32 dist) 
+void waitTicks(uint32 ticks) 
 {
-	uint32 final = tick + dist;
+	uint32 final = tick + ticks;
 
 	while (tick < final);
 }
 
-void waitSeconds(uint32 dist) 
+volatile void waitSeconds(uint32 seconds) 
 {
-	uint32 final = tick + dist * freq;
+	uint32 final = tick + seconds * freq;
 	
 	while (tick < final);
 }
@@ -37,13 +37,13 @@ void init_timer(uint32 frequency)
 	uint32 divisor = 1193180 / frequency;
 
 	// Send the command byte.
-	__outb(0x43, 0x36);
+	__outbyte(0x43, 0x36);
 
 	// Divisor has to be sent byte-wise, so split here into upper/lower bytes.
 	uint8 l = (uint8)(divisor & 0xFF);
 	uint8 h = (uint8)((divisor >> 8) & 0xFF);
 
 	// Send the frequency divisor.
-	__outb(0x40, l);
-	__outb(0x40, h);
+	__outbyte(0x40, l);
+	__outbyte(0x40, h);
 }

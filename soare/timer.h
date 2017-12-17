@@ -5,6 +5,6 @@
 
 void init_timer(uint32);
 void waitTicks(uint32);
-void waitSeconds(uint32);
+volatile void waitSeconds(uint32);
 
 #endif

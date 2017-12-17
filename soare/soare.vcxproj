@@ -233,12 +233,14 @@
     <ClInclude Include="boot.h" />
     <ClInclude Include="defs.h" />
     <ClInclude Include="isr.h" />
+    <ClInclude Include="pic.h" />
     <ClInclude Include="screen.h" />
     <ClInclude Include="timer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="isr.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="pic.c" />
     <ClCompile Include="screen.c" />
     <ClCompile Include="timer.c" />
   </ItemGroup>

@@ -74,7 +74,7 @@ times (0x100 - MULTIBOOT_HEADER_SIZE - MULTIBOOT_INFO_STRUCT_SIZE - 0x40) db 0
 GDT64:
     dq 0
 .Code: equ $ - GDT64
-    dq (1 << 44) | (1 << 47) | (1 << 43) | (1 << 53)
+    dq (1 << 43) | (1 << 44) | (1 << 47) | (1 << 53)
 .Pointer:
     dw $ - GDT64 - 1
     dq gdtBase
@@ -161,7 +161,6 @@ gMultiBootEntryPoint:
         call EntryPoint
 		
 	.os_returned:
-		call __magic
 		;print "OS returned!"
 		mov rax, 0x4f724f204f534f4f
 		mov [0xb8000], rax
@@ -169,6 +168,7 @@ gMultiBootEntryPoint:
 		mov [0xb8008], rax
 		mov rax, 0x4f214f644f654f6e
 		mov [0xb8010], rax
+		call __magic
 		hlt
 
 [bits 32]
@@ -229,7 +229,7 @@ loop_p3:
 %endrep
 %endmacro
 
-EXPORT2C __cli, __sti, __magic, __outb
+EXPORT2C __cli, __sti, __magic
 __cli:
     cli
     ret
@@ -241,9 +241,3 @@ __sti:
 __magic:
     xchg bx, bx
     ret
-	
-__outb
-	pop dx
-	pop ax
-	out dx, al
-	ret

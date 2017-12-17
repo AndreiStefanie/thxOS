@@ -9,7 +9,7 @@ uint16 indexY = 0;
 
 void PutChar(char C, int Pos)
 {
-	char *vidMem = (char *) 0xb8000;
+	char *vidMem = (char *)0xb8000;
 
 	vidMem[Pos * 2] = C;
 	vidMem[Pos * 2 + 1] = color;
@@ -40,10 +40,14 @@ void incIndex()
 			indexY = 0;
 		}
 		else
+		{
 			indexY++;
+		}
 	}
 	else
+	{
 		indexX++;
+	}
 }
 
 void PutInt(int I, int Pos)
@@ -102,7 +106,7 @@ void PutStringLine(char *String, int Line)
 void Welcome()
 {
 	int line = 1;
-	
+
 	PutStringLine("   _____                         ____   _____ ", line);
 	PutStringLine("  / ____|                       / __ \\ / ____|", line + 1);
 	PutStringLine(" | (___   ___   __ _ _ __ ___  | |  | | (___  ", line + 2);
@@ -111,7 +115,7 @@ void Welcome()
 	PutStringLine(" |_____/ \\___/ \\__,_|_|  \\___|  \\____/|_____/ ", line + 5);
 }
 
-int itoa_cust(int i, char *buf) 
+int itoa_cust(int i, char *buf)
 {
 	char const digit[] = "0123456789";
 	int shifter = 0;
