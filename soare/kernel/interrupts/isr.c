@@ -1,46 +1,104 @@
 #include "isr.h"
 #include "../screen.h"
+#include "pic.h"
 
-#define EOI 0x20
+isr_t interrupt_handlers[256];
 
-irq_t interrupt_handlers[256];
-
-void register_interrupt_handler(uint8 n, irq_t handler)
+static void empty_handler(interrupt_context_t context)
 {
-	interrupt_handlers[n] = handler;
+	SetColor(VGA_WHITE);
+	PutStringLine("Unhandled exception: ", 0);
+	PutInt((int)context.int_no, 21);
 }
 
-void isr_handler(registers_t regs)
+void init_handlers()
 {
-	if (0 != interrupt_handlers[regs.int_no])
+	for (size_t i = 0; i < 256; i++)
 	{
-		irq_t handler = interrupt_handlers[regs.int_no];
-		handler(regs);
+		interrupt_handlers[i] = (isr_t)&empty_handler;
+	}
+}
+
+void register_interrupt_handler(uint8 interrupt, isr_t handler)
+{
+	interrupt_handlers[interrupt] = handler;
+}
+
+void isr_handler(interrupt_context_t context)
+{
+	__magic();
+	volatile int temp = (int)context.int_no;
+	isr_t handler = interrupt_handlers[temp];
+	handler(context);
+}
+
+void __stdcall irq_handler(interrupt_context_t context)
+{
+	isr_handler(context);
+	
+	// Send an EOI (end of interrupt) signal to the PICs.
+	if (0x28 <= context.int_no)
+	{
+		// Send reset signal to slave.
+		__outbyte(PIC2, EOI);
+	}
+
+	// Send reset signal to master.
+	__outbyte(PIC1, EOI);
+}
+
+void mask_irq(uint8 irq)
+{
+	uint8 value;
+	uint16 port;
+	
+	if (ALL == irq)
+	{
+		port = PIC1DATA;
+		value = 0xFF;
 	}
 	else
 	{
-		SetColor(VGA_WHITE);
-		PutStringLine("unhandled interrupt: ", 0);
-		PutInt(regs.int_no, MAX_COLUMNS);
+		if (irq < 40)
+		{
+			port = PIC1DATA;
+		}
+		else
+		{
+			port = PIC2DATA;
+			irq -= 8;
+		}
+
+		value = __inbyte(port) | (1 << irq);
 	}
+
+	__outbyte(port, value);
 }
 
-void irq_handler(registers_t regs)
+void unmask_irq(uint8 irq)
 {
-	// Send an EOI (end of interrupt) signal to the PICs.
-	// If this interrupt involved the slave.
-	if (40 <= regs.int_no)
+	uint8 value;
+	uint16 port;
+	
+	if (ALL == irq)
 	{
-		// Send reset signal to slave.
-		__outbyte(0xA0, EOI);
+		port = PIC1DATA;
+		value = 0x00;
+	}
+	else
+	{
+		if (irq < 40)
+		{
+			port = PIC1DATA;
+		}
+		else
+		{
+			port = PIC2DATA;
+			irq -= 8;
+		}
+
+		value = __inbyte(port) & ~(1 << irq);
 	}
 
-	// Send reset signal to master. (As well as slave, if necessary).
-	__outbyte(0x20, EOI);
-
-	if (0 != interrupt_handlers[regs.int_no])
-	{
-		irq_t handler = interrupt_handlers[regs.int_no];
-		handler(regs);
-	}
+	__outbyte(port, value);
 }

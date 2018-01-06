@@ -1,37 +1,49 @@
-#ifndef ISR_H
-#define ISR_H
+#pragma once
 
-#include "../defs.h"
+#include "..\defs.h"
+#include "..\cpu.h"
 
-#define IRQ0 32
-#define IRQ1 33
-#define IRQ2 34
-#define IRQ3 35
-#define IRQ4 36
-#define IRQ5 37
-#define IRQ6 38
-#define IRQ7 39
-#define IRQ8 40
-#define IRQ9 41
-#define IRQ10 42
-#define IRQ11 43
-#define IRQ12 44
-#define IRQ13 45
-#define IRQ14 46
-#define IRQ15 47
+#define ALL         0xFF
 
-typedef struct registers
+#define TIMER		0x20
+#define KEYBOARD	0x21
+#define CASCADE		0x22
+#define COM2_4		0x23
+#define COM1_3		0x24
+#define LPT			0x25
+#define FLOPPY		0x26
+#define FREE7		0x27
+
+#define CLOCK		0x28
+#define FREE9		0x29
+#define FREE10		0x2A
+#define FREE11		0x2B
+#define PS2MOUSE	0x2C
+#define COPROC		0x2D
+#define IDE_1		0x2E
+#define IDE_2		0x2F
+
+#define EOI 0x20
+
+//#pragma pack(push, 1)
+struct interrupt_context
 {
-	uint32 ds;                  // Data segment selector
-	uint32 edi, esi, ebp, esp, ebx, edx, ecx, eax; // Pushed by pusha.
-	uint32 int_no, err_code;    // Interrupt number and error code (if applicable)
-	uint32 eip, cs, eflags, useresp, ss; // Pushed by the processor automatically.
-} registers_t;
+	registers_t regs;       // all general-purpose registers.
+	uint64      error;      // exception error identifier.
+	uint64      int_no;		// interrupt vector number.
+	uint64      retaddr;    // interrupt return address.
+	uint64      cs;         // code segment.
+	uint64      rflags;     // flags register.
+	uint64      rsp;        // stack pointer.
+	uint64      ss;         // stack segment.
+};
+//#pragma pack(pop)
 
-// Enables registration of callbacks for interrupts or IRQs.
-// For IRQs, to ease confusion, use the #defines above as the
-// first parameter.
-typedef void(*irq_t)(registers_t);
-void register_interrupt_handler(uint8 n, irq_t handler);
+typedef struct interrupt_context interrupt_context_t;
 
-#endif
+typedef void(*isr_t)(interrupt_context_t context);
+void register_interrupt_handler(uint8 interrupt, isr_t handler);
+
+void mask_irq(uint8);
+void unmask_irq(uint8);
+void init_handlers(void);

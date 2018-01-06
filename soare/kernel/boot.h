@@ -1,5 +1,4 @@
-#ifndef _BOOT_H_
-#define _BOOT_H_
+#pragma once
 
 #include "defs.h"
 #include <intrin.h>
@@ -68,9 +67,7 @@ typedef struct _MULTIBOOT_INFO
 //
 // exported functions from __init.asm
 //
-void __cli(void);
-void __sti(void);
-void __magic(void);
-void __cdecl __outb(uint16, uint8);
-
-#endif // _BOOT_H_
+extern void __cli(void);
+extern void __sti(void);
+extern void __magic(void);
+extern void __lidt(uint64);

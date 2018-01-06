@@ -149,16 +149,17 @@ gMultiBootEntryPoint:
 
     [bits 64]
     longMode:
-        mov ax, 0
-        mov ss, ax
-        mov ds, ax
-        mov es, ax
-        mov fs, ax
-        mov gs, ax
+		mov ax, 0
+		mov ss, ax
+		mov ds, ax
+		mov es, ax
+		mov fs, ax
+		mov gs, ax
 		; print "OK"
         ;mov dword [0xb8000], 0x2f4b2f4f
 		
         call EntryPoint
+		;int 41
 		
 	.os_returned:
 		;print "OS returned!"
@@ -169,6 +170,7 @@ gMultiBootEntryPoint:
 		mov rax, 0x4f214f644f654f6e
 		mov [0xb8010], rax
 		call __magic
+		cli
 		hlt
 
 [bits 32]
@@ -229,7 +231,153 @@ loop_p3:
 %endrep
 %endmacro
 
-EXPORT2C __cli, __sti, __magic
+[bits 64]
+%macro pushAll 0
+    push rax
+    push rbx
+    push rcx
+    push rdx
+    push rbp
+    push rsi
+    push rdi
+    push rsp
+    push r8
+    push r9
+    push r10
+    push r11
+    push r12
+    push r13
+    push r14
+    push r15
+%endmacro
+
+%macro popAll 0
+    pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop r11
+	pop r10
+	pop r9
+	pop r8
+	pop rsp
+	pop rdi
+	pop rsi
+	pop rbp
+	pop rdx
+	pop rcx
+	pop rbx
+	pop rax
+%endmacro
+
+;;--------------------------------------------------------
+;; ISR
+;;--------------------------------------------------------
+[EXTERN isr_handler]
+
+isr_common:
+	pushAll
+
+	call isr_handler
+
+	popAll
+	add rsp, 16
+	sti
+	iretq
+
+%macro ISR_NOERRCODE 1
+	global isr%1
+	isr%1:
+		cli
+		push byte 0		; dummy error code
+		push byte %1	; exception number
+		jmp isr_common
+%endmacro
+
+%macro ISR_ERRCODE 1
+	global isr%1
+	isr%1:
+		cli
+		push byte %1	; exception number
+		jmp isr_common
+%endmacro
+
+ISR_NOERRCODE 0
+ISR_NOERRCODE 1
+ISR_NOERRCODE 2
+ISR_NOERRCODE 3
+ISR_NOERRCODE 4
+ISR_NOERRCODE 5
+ISR_NOERRCODE 6
+ISR_NOERRCODE 7
+ISR_ERRCODE   8
+ISR_NOERRCODE 9
+ISR_ERRCODE   10
+ISR_ERRCODE   11
+ISR_ERRCODE   12
+ISR_ERRCODE   13
+ISR_ERRCODE   14
+ISR_NOERRCODE 15
+ISR_NOERRCODE 16
+ISR_NOERRCODE 17
+ISR_NOERRCODE 18
+ISR_NOERRCODE 19
+ISR_NOERRCODE 20
+ISR_NOERRCODE 21
+ISR_NOERRCODE 22
+ISR_NOERRCODE 23
+ISR_NOERRCODE 24
+ISR_NOERRCODE 25
+ISR_NOERRCODE 26
+ISR_NOERRCODE 27
+ISR_NOERRCODE 28
+ISR_NOERRCODE 29
+ISR_NOERRCODE 30
+ISR_NOERRCODE 31
+
+
+;;--------------------------------------------------------
+;; IRQ
+;;--------------------------------------------------------
+[EXTERN irq_handler]
+
+irq_common:
+	pushAll
+	;xchg bx, bx
+	call irq_handler
+
+	popAll
+	add rsp, 16
+	sti
+	iretq
+
+%macro IRQ 2
+	global irq%1
+	irq%1:
+		cli
+		push byte 0xDD		; dummy error code
+		push byte %2	; irq number
+		jmp irq_common
+%endmacro
+
+IRQ   0,	32
+IRQ   1,	33
+IRQ   2,	34
+IRQ   3,	35
+IRQ   4,	36
+IRQ   5,	37
+IRQ   6,	38
+IRQ   7,	39
+IRQ   8,	40
+IRQ   9,	41
+IRQ   10,	42
+IRQ   11,	43
+IRQ   12,	44
+IRQ   13,	45
+IRQ   14,	46
+IRQ   15,	47
+
+EXPORT2C __cli, __sti, __magic, __lidt
 __cli:
     cli
     ret
@@ -240,4 +388,9 @@ __sti:
 
 __magic:
     xchg bx, bx
+    ret
+
+__lidt:
+	mov eax, [esp+8] 
+    lidt [eax]
     ret

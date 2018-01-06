@@ -231,20 +231,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="kernel\boot.h" />
+    <ClInclude Include="kernel\cpu.h" />
     <ClInclude Include="kernel\defs.h" />
+    <ClInclude Include="kernel\devices\keyboard.h" />
     <ClInclude Include="kernel\interrupts\idt.h" />
     <ClInclude Include="kernel\interrupts\isr.h" />
     <ClInclude Include="kernel\interrupts\pic.h" />
     <ClInclude Include="kernel\screen.h" />
-    <ClInclude Include="kernel\interrupts\timer.h" />
+    <ClInclude Include="kernel\devices\timer.h" />
+    <ClInclude Include="kernel\util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="kernel\devices\keyboard.c" />
     <ClCompile Include="kernel\interrupts\idt.c" />
     <ClCompile Include="kernel\interrupts\isr.c" />
     <ClCompile Include="kernel\main.c" />
     <ClCompile Include="kernel\interrupts\pic.c" />
     <ClCompile Include="kernel\screen.c" />
-    <ClCompile Include="kernel\interrupts\timer.c" />
+    <ClCompile Include="kernel\devices\timer.c" />
+    <ClCompile Include="kernel\util.c" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="kernel\__init.asm">

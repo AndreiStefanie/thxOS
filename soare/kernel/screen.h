@@ -1,5 +1,4 @@
-#ifndef _SCREEN_H_
-#define _SCREEN_H_
+#pragma once
 
 #include "boot.h"
 #include <stdlib.h>
@@ -27,5 +26,3 @@ void PrintChar(char C, BYTE Color);
 void PutString(char* String, int Pos);
 void PutStringLine(char* String, int Line);
 void Welcome(void);
-
-#endif // _SCREEN_H_

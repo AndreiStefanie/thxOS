@@ -1,5 +1,4 @@
-#ifndef _DEFS_H_
-#define _DEFS_H_
+#pragma once
 
 //
 // generic version definitions for Win32 / WDK
@@ -102,5 +101,3 @@ typedef _Bool bool;
 #define NULL 0
 
 #define UNUSED(x) (void)(x)
-
-#endif // _DEFS_H_
