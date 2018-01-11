@@ -53,14 +53,14 @@ typedef signed __int16     INT16;
 typedef signed __int32     INT32;
 typedef signed __int64     INT64;
 
-typedef signed char		   int8;
-typedef unsigned char	   uint8;
-typedef signed short	   int16;
-typedef unsigned short	   uint16;
-typedef signed int		   int32;
-typedef unsigned int	   uint32;
-typedef signed long long   int64;
-typedef unsigned long long uint64;
+typedef signed char	        int8;
+typedef unsigned char	    uint8;
+typedef signed short        int16;
+typedef unsigned short	    uint16;
+typedef signed int		    int32;
+typedef unsigned int	    uint32;
+typedef signed long long    int64;
+typedef unsigned long long  uint64;
 
 typedef _Bool bool;
 

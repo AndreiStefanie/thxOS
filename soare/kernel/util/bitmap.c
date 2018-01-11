@@ -1,11 +1,12 @@
 #include "bitmap.h"
 
-bitmap_t memory_bm;
-
 void bitmap_init(bitmap_t *bm)
 {
-	bm->bit_cnt = BM_CNT;
-	bm->map = 0;
+	bm->bit_cnt = BM_MAX;
+	for (size_t i; i < BM_SIZE; i++)
+	{
+	    bm->map[i] = 0;
+	}
 }
 
 void bitmap_destroy(bitmap_t *bm)
@@ -15,16 +16,19 @@ void bitmap_destroy(bitmap_t *bm)
 
 bool bitmap_test(bitmap_t *bm, size_t index)
 {
-	BM_TYPE *map = &bm->map;
-	
-	return (map[index / BM_CNT] >> (index % BM_CNT)) & 1ull;
+	return (bm->map[BIT_INDEX(index)] & (1ull << BIT_SHIFT(index)));
 }
 
 void bitmap_set(bitmap_t *bm, size_t index, bool bit)
 {
-	BM_TYPE *map = &bm->map;
-
-	map[index / BM_CNT] |= 1ull << (bit % BM_CNT);
+	if (bit)
+    {
+        bm->map[BIT_INDEX(index)] |= (1ull << BIT_SHIFT(index));
+    }
+    else
+    {
+        bm->map[BIT_INDEX(index)] &= ~(1ull << BIT_SHIFT(index));
+    }
 }
 
 void bitmap_flip(bitmap_t *bm, size_t index)
@@ -44,7 +48,7 @@ size_t bitmap_scan(bitmap_t *bm, size_t count, bool bit)
 {
 	size_t available_start = BM_ERROR;
 
-	if (count > BM_CNT)
+	if (count > BM_MAX)
 	{
 		return BM_ERROR;
 	}
@@ -58,7 +62,7 @@ size_t bitmap_scan(bitmap_t *bm, size_t count, bool bit)
 
 		for (size_t j = 1; j < count; j++)
 		{
-			if (bitmap_test(bm, i) != bit)
+			if (bitmap_test(bm, i + j) != bit)
 			{
 				break;
 			}

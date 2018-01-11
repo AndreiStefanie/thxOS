@@ -4,16 +4,21 @@
 
 // the underlying structure used by the bitmap
 #define BM_TYPE uint64
+#define BM_SIZE 64
 
 // how many bits fit in the underlying data type
 #define BM_CNT (sizeof (BM_TYPE) * CHAR_BIT)
+#define BM_MAX BM_CNT * BM_SIZE
 
 #define BM_ERROR SIZE_MAX
 
+#define BIT_SHIFT(i) ((i) % BM_CNT)
+#define BIT_INDEX(i) ((i) / BM_CNT)
+
 struct bitmap
 {
-	size_t bit_cnt;  // Number of bits.
-	BM_TYPE map;      // The actual bitmap.
+	size_t bit_cnt;         // Number of bits.
+	BM_TYPE map[BM_SIZE];   // The actual bitmap.
 };
 
 typedef struct bitmap bitmap_t;
