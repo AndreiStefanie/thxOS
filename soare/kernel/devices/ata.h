@@ -42,6 +42,8 @@
 #define ATA_REG_ALTSTATUS  0x0C
 #define ATA_REG_DEVADDRESS 0x0D
 
+#define SECTOR_SIZE 512
+
 struct ata_disk
 {
 	char name[8];			 // e.g. "hd0"

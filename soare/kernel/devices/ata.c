@@ -94,7 +94,7 @@ void ata_read(const channel_t *channel, uint32 lba, uint8 *buf)
 	send_pio(channel, ATA_REG_LBA2, (uint8)((lba & 0x00ff0000) >> 16));
 	send_pio(channel, ATA_REG_COMMAND, ATA_CMD_READ_PIO);
 
-	__inbytestring(channel->reg_base, buf, 256);
+	__inbytestring(channel->reg_base, buf, SECTOR_SIZE);
 	ata_wait_for_idle(channel);
 }
 

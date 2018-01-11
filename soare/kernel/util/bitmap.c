@@ -44,6 +44,10 @@ void bitmap_set_all(bitmap_t *bm, bool bit)
 	}
 }
 
+//
+// Search for the first group of bits having the given
+// length and value.
+//
 size_t bitmap_scan(bitmap_t *bm, size_t count, bool bit)
 {
 	size_t available_start = BM_ERROR;
