@@ -1,18 +1,29 @@
 #include "screen.h"
+#include "util.h"
+#include "boot.h"
 
 void incIndex(void);
-int itoa_cust(int i, char *buf);
+void incIndexY(void);
 
+char *vidMem = NULL;
 BYTE color = 0;
-uint16 indexX = 0;
-uint16 indexY = 0;
+uint8 indexX = 0;
+uint8 indexY = 0;
 
 void PutChar(char C, int Pos)
 {
-	char *vidMem = (char *)0xb8000;
+	if ('\n' == C)
+	{
+		incIndexY();
+		indexX = 0;
+	}
+	else
+	{
+		vidMem[Pos * 2] = C;
+		vidMem[Pos * 2 + 1] = color;
 
-	vidMem[Pos * 2] = C;
-	vidMem[Pos * 2 + 1] = color;
+		incIndex();
+	}
 }
 
 void PutCharAt(char C, int X, int Y)
@@ -20,33 +31,31 @@ void PutCharAt(char C, int X, int Y)
 	PutChar(C, Y * MAX_COLUMNS + X);
 }
 
-void PrintChar(char C, BYTE Color)
-{
-	BYTE color_temp = color;
-	SetColor(Color);
-	PutCharAt(C, indexX, indexY);
-	incIndex();
-	SetColor(color_temp);
-}
-
 void incIndex()
 {
-	if (indexX == MAX_COLUMNS - 1)
+	
+	/*if (indexX == MAX_COLUMNS - 1)
 	{
+		__magic();
 		indexX = 0;
-		if (indexY == MAX_LINES - 1)
-		{
-			ClearScreen();
-			indexY = 0;
-		}
-		else
-		{
-			indexY++;
-		}
+		incIndexY();
+	}
+	else
+	{*/
+		indexX++;
+	//}
+}
+
+void incIndexY()
+{
+	if (indexY == MAX_LINES - 1)
+	{
+		ClearScreen();
+		indexY = 0;
 	}
 	else
 	{
-		indexX++;
+		indexY++;
 	}
 }
 
@@ -68,7 +77,6 @@ void SetColor(BYTE Color)
 void SetScreenColor(BYTE Color)
 {
 	int i = 0;
-	char *vidMem = (char *)0xb8000;
 
 	for (i = 0; i < MAX_OFFSET; i++)
 	{
@@ -87,10 +95,13 @@ void ClearScreen()
 		PutChar(0, i);
 	}
 
+	indexX = 0;
+	indexY = 0;
+
 	color = color_temp;
 }
 
-void PutString(char *String, int Pos)
+void PutString(const char *String, int Pos)
 {
 	for (int i = 0; (String[i] != 0) && (i < MAX_OFFSET); i++)
 	{
@@ -98,48 +109,65 @@ void PutString(char *String, int Pos)
 	}
 }
 
-void PutStringLine(char *String, int Line)
+void PutStringLine(const char *String, int Line)
 {
 	PutString(String, Line * MAX_COLUMNS);
 }
 
-void Welcome()
+void PrintChar_C(char C, BYTE Color)
 {
-	int line = 1;
-
-	PutStringLine("   _____                         ____   _____ ", line);
-	PutStringLine("  / ____|                       / __ \\ / ____|", line + 1);
-	PutStringLine(" | (___   ___   __ _ _ __ ___  | |  | | (___  ", line + 2);
-	PutStringLine("  \\___ \\ / _ \\ / _` | '__/ _ \\ | |  | |\\___ \\ ", line + 3);
-	PutStringLine("  ____) | (_) | (_| | | |  __/ | |__| |____) |", line + 4);
-	PutStringLine(" |_____/ \\___/ \\__,_|_|  \\___|  \\____/|_____/ ", line + 5);
+	BYTE color_temp = color;
+	SetColor(Color);
+	PutCharAt(C, indexX, indexY);
+	SetColor(color_temp);
 }
 
-int itoa_cust(int i, char *buf)
+void PrintChar(char C)
 {
-	char const digit[] = "0123456789";
-	int shifter = 0;
-	int digits = 0;
+	PrintChar_C(C, color);
+}
 
-	if (i < 0)
+void PrintString_C(const char *String, BYTE Color)
+{
+	for (size_t i = 0; String[i] != 0; i++)
 	{
-		*buf++ = '-';
-		i *= -1;
+		PrintChar_C(String[i], Color);
 	}
+}
 
-	shifter = i;
-	do {
-		buf++;
-		shifter = shifter / 10;
-		digits++;
-	} while (shifter);
+void PrintString(const char *String)
+{
+	PrintString_C(String, color);
+}
 
-	*buf = '\0';
+void PrintInt_C(int I, BYTE Color)
+{
+	char buf[10];
 
-	do {
-		*--buf = digit[i % 10];
-		i = i / 10;
-	} while (i);
+	itoa_cust(I, buf);
+	PrintString_C(buf, Color);
+}
 
-	return digits;
+void PrintInt(int I)
+{
+	PrintInt_C(I, color);
+}
+
+void screen_init()
+{
+	vidMem = (char *)0xb8000;
+	ClearScreen();
+	SetColor(VGA_WHITE);
+}
+
+void Welcome()
+{
+	incIndexY();
+
+	PrintString("   _____                         ____   _____ \n");
+	PrintString("  / ____|                       / __ \\ / ____|\n");
+	PrintString(" | (___   ___   __ _ _ __ ___  | |  | | (___  \n");
+	PrintString("  \\___ \\ / _ \\ / _` | '__/ _ \\ | |  | |\\___ \\ \n");
+	PrintString("  ____) | (_) | (_| | | |  __/ | |__| |____) |\n");
+	PrintString(" |_____/ \\___/ \\__,_|_|  \\___|  \\____/|_____/ \n");
 }

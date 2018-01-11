@@ -38,6 +38,12 @@
     <ClCompile Include="kernel\devices\keyboard.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="kernel\devices\ata.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="kernel\util\bitmap.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kernel\boot.h">
@@ -68,6 +74,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="kernel\cpu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kernel\devices\ata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kernel\util\bitmap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

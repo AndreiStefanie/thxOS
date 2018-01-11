@@ -1,4 +1,5 @@
 #include "pic.h"
+#include "isr.h"
 
 void init_pics(int pic1, int pic2)
 {
@@ -24,4 +25,6 @@ void init_pics(int pic1, int pic2)
 	// restore masks
 	__outbyte(PIC1DATA, temp1);
 	__outbyte(PIC2DATA, temp2);
+
+	mask_irq(ALL);
 }

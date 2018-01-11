@@ -155,11 +155,7 @@ gMultiBootEntryPoint:
 		mov es, ax
 		mov fs, ax
 		mov gs, ax
-		; print "OK"
-        ;mov dword [0xb8000], 0x2f4b2f4f
-		
         call EntryPoint
-		;int 41
 		
 	.os_returned:
 		;print "OS returned!"
@@ -232,74 +228,98 @@ loop_p3:
 %endmacro
 
 [bits 64]
-%macro pushAll 0
-    push rax
-    push rbx
-    push rcx
-    push rdx
-    push rbp
-    push rsi
-    push rdi
-    push rsp
-    push r8
-    push r9
-    push r10
-    push r11
-    push r12
-    push r13
-    push r14
-    push r15
-%endmacro
-
-%macro popAll 0
-    pop r15
-	pop r14
-	pop r13
-	pop r12
-	pop r11
-	pop r10
-	pop r9
-	pop r8
-	pop rsp
-	pop rdi
-	pop rsi
-	pop rbp
-	pop rdx
-	pop rcx
-	pop rbx
-	pop rax
-%endmacro
 
 ;;--------------------------------------------------------
 ;; ISR
 ;;--------------------------------------------------------
 [EXTERN isr_handler]
 
-isr_common:
-	pushAll
-
-	call isr_handler
-
-	popAll
-	add rsp, 16
-	sti
-	iretq
-
 %macro ISR_NOERRCODE 1
-	global isr%1
+	EXPORT2C isr%1
 	isr%1:
-		cli
-		push byte 0		; dummy error code
-		push byte %1	; exception number
-		jmp isr_common
+		push %1		; exception number
+		push r15
+		push r14
+		push r13
+        push r12
+        push r11
+        push r10
+        push r9
+        push r8
+        push rbp
+        push rdi
+        push rsi
+        push rdx
+        push rcx
+        push rbx
+        push rax
+
+		mov rcx, rsp
+		call isr_handler
+
+		pop rax
+        pop rbx
+        pop rcx
+        pop rdx
+        pop rsi
+        pop rdi
+        pop rbp
+        pop r8
+        pop r9
+        pop r10
+        pop r11
+        pop r12
+        pop r13
+        pop r14
+        pop r15
+		add rsp, 8
+
+		iretq
 %endmacro
 
+; Certain exceptions push and additional error code on top
+; of the stack. The code must be pulled in those cases.
 %macro ISR_ERRCODE 1
-	global isr%1
+	EXPORT2C isr%1
 	isr%1:
-		cli
-		push byte %1	; exception number
-		jmp isr_common
+		push %1		; exception number
+		push r15
+		push r14
+		push r13
+        push r12
+        push r11
+        push r10
+        push r9
+        push r8
+        push rbp
+        push rdi
+        push rsi
+        push rdx
+        push rcx
+        push rbx
+        push rax
+
+		mov rcx, rsp
+		call isr_handler
+
+		pop rax
+        pop rbx
+        pop rcx
+        pop rdx
+        pop rsi
+        pop rdi
+        pop rbp
+        pop r8
+        pop r9
+        pop r10
+        pop r11
+        pop r12
+        pop r13
+        pop r14
+        pop r15
+		add rsp, 8
+		
+		iretq
 %endmacro
 
 ISR_NOERRCODE 0
@@ -340,24 +360,47 @@ ISR_NOERRCODE 31
 ;; IRQ
 ;;--------------------------------------------------------
 [EXTERN irq_handler]
-
-irq_common:
-	pushAll
-	;xchg bx, bx
-	call irq_handler
-
-	popAll
-	add rsp, 16
-	sti
-	iretq
-
 %macro IRQ 2
 	global irq%1
 	irq%1:
-		cli
-		push byte 0xDD		; dummy error code
-		push byte %2	; irq number
-		jmp irq_common
+		push %2		; remapped irq number
+		push r15
+		push r14
+		push r13
+        push r12
+        push r11
+        push r10
+        push r9
+        push r8
+        push rbp
+        push rdi
+        push rsi
+        push rdx
+        push rcx
+        push rbx
+        push rax
+		
+		mov rcx, rsp
+		call irq_handler
+
+		pop rax
+        pop rbx
+        pop rcx
+        pop rdx
+        pop rsi
+        pop rdi
+        pop rbp
+        pop r8
+        pop r9
+        pop r10
+        pop r11
+        pop r12
+        pop r13
+        pop r14
+        pop r15
+		add rsp, 8
+
+		iretq
 %endmacro
 
 IRQ   0,	32

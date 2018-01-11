@@ -4,33 +4,43 @@
 #include "interrupts\idt.h"
 #include "devices\timer.h"
 #include "devices\keyboard.h"
+#include "devices\ata.h"
 
 void EntryPoint(void)
 {
-	ClearScreen();
+	screen_init();
 
+	PrintChar('\n');
+
+	PrintString("Initializing interrupts...");
 	init_idt();
 	init_handlers();
 	init_pics(0x20, 0x28);
-
-	mask_irq(ALL);
-
-	unmask_irq(TIMER);
-	unmask_irq(KEYBOARD);
-
-	init_timer(50);
-	init_keyboard();
-
-	// cause DIV_BY_0
-	/*volatile int test = 1;
-	volatile int zero = 0;
-	volatile int rez = test / zero;*/
-
 	__sti();
+	PrintString("done\n");
 
-	SetColor(VGA_LIGHT_RED);
+	PrintString("Initializing timer...");
+	init_timer();
+	waitSeconds(1);
+	PrintString("done\n");
+
+	PrintString("Initializing keyboard...");
+	init_keyboard();
+	waitSeconds(1);
+	PrintString("done\n");
+
+	PrintString("Initializing ide...");
+	ata_init();
+	waitSeconds(1);
+	PrintString("done\n");
+
 	Welcome();
 
-	//__magic();
-	waitSeconds(30);
+	/*volatile int one = 1;
+	volatile int zero = 0;
+	volatile int rez = one / zero;*/
+
+	while (1)
+	{
+	}
 }

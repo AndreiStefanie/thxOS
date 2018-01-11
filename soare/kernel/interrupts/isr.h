@@ -25,11 +25,10 @@
 
 #define EOI 0x20
 
-//#pragma pack(push, 1)
+#pragma pack(push, 1)
 struct interrupt_context
 {
 	registers_t regs;       // all general-purpose registers.
-	uint64      error;      // exception error identifier.
 	uint64      int_no;		// interrupt vector number.
 	uint64      retaddr;    // interrupt return address.
 	uint64      cs;         // code segment.
@@ -37,13 +36,14 @@ struct interrupt_context
 	uint64      rsp;        // stack pointer.
 	uint64      ss;         // stack segment.
 };
-//#pragma pack(pop)
+#pragma pack(pop)
 
 typedef struct interrupt_context interrupt_context_t;
 
-typedef void(*isr_t)(interrupt_context_t context);
+typedef void(*isr_t)(interrupt_context_t *context);
 void register_interrupt_handler(uint8 interrupt, isr_t handler);
 
 void mask_irq(uint8);
 void unmask_irq(uint8);
 void init_handlers(void);
+void panic();

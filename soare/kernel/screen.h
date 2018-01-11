@@ -7,8 +7,7 @@
 #define MAX_COLUMNS     80
 #define MAX_OFFSET      2000 //25 lines * 80 chars
 
-#pragma pack(push)
-#pragma pack(1)
+#pragma pack(push, 1)
 typedef struct _SCREEN
 {
     char c;
@@ -16,13 +15,23 @@ typedef struct _SCREEN
 }SCREEN, *PSCREEN;
 #pragma pack(pop)
 
+void screen_init(void);
+
 void SetColor(BYTE Color);
 void SetScreenColor(BYTE Color);
 void ClearScreen(void);
+
 void PutChar(char C, int Pos);
 void PutCharAt(char C, int X, int Y);
 void PutInt(int I, int Pos);
-void PrintChar(char C, BYTE Color);
-void PutString(char* String, int Pos);
-void PutStringLine(char* String, int Line);
+void PutString(const char* String, int Pos);
+void PutStringLine(const char* String, int Line);
+
+void PrintChar(char C);
+void PrintChar_C(char C, BYTE Color);
+void PrintString(const char *String);
+void PrintString_C(const char *String, BYTE Color);
+void PrintInt(int I);
+void PrintInt_C(int I, BYTE Color);
+
 void Welcome(void);

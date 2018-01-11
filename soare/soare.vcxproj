@@ -233,6 +233,7 @@
     <ClInclude Include="kernel\boot.h" />
     <ClInclude Include="kernel\cpu.h" />
     <ClInclude Include="kernel\defs.h" />
+    <ClInclude Include="kernel\devices\ata.h" />
     <ClInclude Include="kernel\devices\keyboard.h" />
     <ClInclude Include="kernel\interrupts\idt.h" />
     <ClInclude Include="kernel\interrupts\isr.h" />
@@ -240,9 +241,11 @@
     <ClInclude Include="kernel\screen.h" />
     <ClInclude Include="kernel\devices\timer.h" />
     <ClInclude Include="kernel\util.h" />
+    <ClInclude Include="kernel\util\bitmap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="kernel\devices\keyboard.c" />
+    <ClCompile Include="kernel\devices\ata.c" />
     <ClCompile Include="kernel\interrupts\idt.c" />
     <ClCompile Include="kernel\interrupts\isr.c" />
     <ClCompile Include="kernel\main.c" />
@@ -250,6 +253,7 @@
     <ClCompile Include="kernel\screen.c" />
     <ClCompile Include="kernel\devices\timer.c" />
     <ClCompile Include="kernel\util.c" />
+    <ClCompile Include="kernel\util\bitmap.c" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="kernel\__init.asm">
