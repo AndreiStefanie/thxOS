@@ -7,8 +7,8 @@ void incIndexY(void);
 
 char *vidMem = NULL;
 BYTE color = 0;
-uint8 indexX = 0;
-uint8 indexY = 0;
+uint8_t indexX = 0;
+uint8_t indexY = 0;
 
 void PutChar(char C, int Pos)
 {
@@ -33,7 +33,7 @@ void PutCharAt(char C, int X, int Y)
 
 void incIndex()
 {
-	
+
 	/*if (indexX == MAX_COLUMNS - 1)
 	{
 		__magic();
@@ -42,7 +42,7 @@ void incIndex()
 	}
 	else
 	{*/
-		indexX++;
+	indexX++;
 	//}
 }
 
@@ -140,7 +140,7 @@ void PrintString(const char *String)
 	PrintString_C(String, color);
 }
 
-void PrintInt_C(int I, BYTE Color)
+void PrintInt_C(int64_t I, BYTE Color)
 {
 	char buf[10];
 
@@ -148,7 +148,7 @@ void PrintInt_C(int I, BYTE Color)
 	PrintString_C(buf, Color);
 }
 
-void PrintInt(int I)
+void PrintInt(int64_t I)
 {
 	PrintInt_C(I, color);
 }

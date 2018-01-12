@@ -1,5 +1,5 @@
 #pragma once
-#include "../defs.h"
+#include "defs.h"
 
 enum keycode
 {
@@ -89,8 +89,8 @@ typedef enum keycode keycode_t;
 
 struct keylayout
 {
-	uint8 shifted[128];
-	uint8 unshifted[128];
+	uint8_t shifted[128];
+	uint8_t unshifted[128];
 };
 
 typedef struct keylayout keylayout_t;

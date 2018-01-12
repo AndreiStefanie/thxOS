@@ -17,9 +17,6 @@
     <ClCompile Include="kernel\main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="kernel\screen.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="kernel\interrupts\isr.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -27,9 +24,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="kernel\interrupts\idt.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="kernel\util.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="kernel\devices\timer.c">
@@ -44,42 +38,54 @@
     <ClCompile Include="kernel\util\bitmap.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="kernel\memory\page.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="kernel\devices\screen.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="kernel\util\util.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="kernel\boot.h">
+    <ClInclude Include="kernel\include\ata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kernel\defs.h">
+    <ClInclude Include="kernel\include\keyboard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kernel\screen.h">
+    <ClInclude Include="kernel\include\timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kernel\interrupts\isr.h">
+    <ClInclude Include="kernel\include\idt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kernel\interrupts\pic.h">
+    <ClInclude Include="kernel\include\isr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kernel\interrupts\idt.h">
+    <ClInclude Include="kernel\include\pic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kernel\util.h">
+    <ClInclude Include="kernel\include\page.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kernel\devices\timer.h">
+    <ClInclude Include="kernel\include\bitmap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kernel\devices\keyboard.h">
+    <ClInclude Include="kernel\include\boot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kernel\cpu.h">
+    <ClInclude Include="kernel\include\cpu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kernel\devices\ata.h">
+    <ClInclude Include="kernel\include\defs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="kernel\util\bitmap.h">
+    <ClInclude Include="kernel\include\screen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kernel\include\util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

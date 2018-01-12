@@ -1,6 +1,6 @@
 #include "keyboard.h"
-#include "..\interrupts\isr.h"
-#include "..\screen.h"
+#include "isr.h"
+#include "screen.h"
 
 #define KB_PORT_DATA 0x60
 
@@ -56,12 +56,12 @@ static void keyboard_callback(interrupt_context_t *context)
 
 	if (__inbyte(0x64) & 0x1)
 	{
-		uint8 scancode = __inbyte(KB_PORT_DATA);
+		uint8_t scancode = __inbyte(KB_PORT_DATA);
 		bool keyup = !!(scancode & 0x80);
 
 		scancode &= ~0x80;
 
-		uint8 keycode = shiftDown != capsLock ? 
+		uint8_t keycode = shiftDown != capsLock ?
 			ps2_layout.shifted[scancode] : ps2_layout.unshifted[scancode];
 
 		if (keyup)

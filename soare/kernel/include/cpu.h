@@ -24,21 +24,21 @@
 #pragma pack(push, 1)
 struct registers
 {
-	uint64 rax;
-	uint64 rbx;
-	uint64 rcx;
-	uint64 rdx;
-	uint64 rsi;
-	uint64 rdi;
-	uint64 rbp;
-	uint64 r8;
-	uint64 r9;
-	uint64 r10;
-	uint64 r11;
-	uint64 r12;
-	uint64 r13;
-	uint64 r14;
-	uint64 r15;
+	uint64_t rax;
+	uint64_t rbx;
+	uint64_t rcx;
+	uint64_t rdx;
+	uint64_t rsi;
+	uint64_t rdi;
+	uint64_t rbp;
+	uint64_t r8;
+	uint64_t r9;
+	uint64_t r10;
+	uint64_t r11;
+	uint64_t r12;
+	uint64_t r13;
+	uint64_t r14;
+	uint64_t r15;
 };
 #pragma pack(pop)
 

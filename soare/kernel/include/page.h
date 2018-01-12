@@ -1,6 +1,6 @@
 #pragma once
-#include "..\util\bitmap.h"
-#include "..\defs.h"
+#include "bitmap.h"
+#include "defs.h"
 
 #define PAGE_FREE false
 #define PAGE_USED true
@@ -35,7 +35,7 @@ struct pte
     bool is_rw;
     bool is_present;
     bool reserved[11];
-    uint64 frame;
+    uint64_t frame;
 };
 typedef struct pte pte_t;
 
@@ -43,11 +43,11 @@ struct page
 {
     pte_t entry;
     size_t index;
-    uint8 space[PAGE_SIZE];
+    uint8_t space[PAGE_SIZE];
 };
 typedef struct page page_t;
 
 void mem_init();
 page_t *mem_alloc_page();
 void mem_free_page(page_t *page);
-uint64 mem_get_start_address(page_t *page);
+uint64_t mem_get_start_address(page_t *page);

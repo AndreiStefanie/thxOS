@@ -1,5 +1,5 @@
 #pragma once
-#include "..\defs.h"
+#include "defs.h"
 
 #define ATA_CMD_READ_PIO	0x20
 #define ATA_CMD_WRITE_PIO	0x30
@@ -21,8 +21,8 @@
 
 #define ATA_CHANNEL_CNT 1
 
-#define ATA_PRIMARY_IO   0x1F0
-#define ATA_SECONDARY_IO 0x170
+#define ATA_PRIMARY_BUS   0x1F0
+#define ATA_SECONDARY_BUS 0x170
 
 #define ATA_REG_DATA       0x00
 #define ATA_REG_ERROR      0x01
@@ -55,10 +55,12 @@ typedef struct ata_disk ata_disk_t;
 struct channel
 {
 	char name[8];            // e.g. "ide0"
-	uint16 reg_base;         // Base I/O port.
-	uint8 irq;               // Interrupt in use.
+	uint16_t reg_base;         // Base I/O port.
+	uint8_t irq;               // Interrupt in use.
 	ata_disk_t devices[2];   // Devices on this channel
 };
 typedef struct channel channel_t;
 
 void ata_init(void);
+void ata_read(uint16_t bus, uint32_t lba, uint8_t *buf);
+void ata_write(uint16_t bus, uint32_t lba, uint8_t *buf);

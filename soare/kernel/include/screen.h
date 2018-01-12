@@ -1,7 +1,5 @@
 #pragma once
-
 #include "boot.h"
-#include <stdlib.h>
 
 #define MAX_LINES       25
 #define MAX_COLUMNS     80
@@ -31,7 +29,7 @@ void PrintChar(char C);
 void PrintChar_C(char C, BYTE Color);
 void PrintString(const char *String);
 void PrintString_C(const char *String, BYTE Color);
-void PrintInt(int I);
-void PrintInt_C(int I, BYTE Color);
+void PrintInt(int64_t I);
+void PrintInt_C(int64_t I, BYTE Color);
 
 void Welcome(void);

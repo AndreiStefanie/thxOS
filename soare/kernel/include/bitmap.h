@@ -1,9 +1,8 @@
 #pragma once
-#include "..\defs.h"
-#include <stdlib.h>
+#include "defs.h"
 
 // the underlying structure used by the bitmap
-#define BM_TYPE uint64
+#define BM_TYPE uint64_t
 #define BM_SIZE 64
 
 // how many bits fit in the underlying data type

@@ -1,17 +1,17 @@
 #pragma once
-
 #include "isr.h"
+#include "defs.h"
 
 #pragma pack(push, 1)
 struct idt_entry_struct
 {
-	uint16 base_low;
-	uint16 selector;
-	uint8  always0;
-	uint8  flags;
-	uint16 base_mid;
-	uint32 base_high;
-	uint32 reserved;
+	uint16_t base_low;
+	uint16_t selector;
+	uint8_t  always0;
+	uint8_t  flags;
+	uint16_t base_mid;
+	uint32_t base_high;
+	uint32_t reserved;
 };
 #pragma pack(pop)
 
@@ -20,8 +20,8 @@ typedef struct idt_entry_struct idt_entry_t;
 #pragma pack(push, 1)
 struct idt_ptr_struct
 {
-	uint16 limit;
-	uint64 base;
+	uint16_t limit;
+	uint64_t base;
 };
 #pragma pack(pop)
 

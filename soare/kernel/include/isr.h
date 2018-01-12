@@ -1,7 +1,6 @@
 #pragma once
-
-#include "..\defs.h"
-#include "..\cpu.h"
+#include "defs.h"
+#include "cpu.h"
 
 #define ALL         0xFF
 
@@ -29,21 +28,21 @@
 struct interrupt_context
 {
 	registers_t regs;       // all general-purpose registers.
-	uint64      int_no;		// interrupt vector number.
-	uint64      retaddr;    // interrupt return address.
-	uint64      cs;         // code segment.
-	uint64      rflags;     // flags register.
-	uint64      rsp;        // stack pointer.
-	uint64      ss;         // stack segment.
+	uint64_t    int_no;		// interrupt vector number.
+	uint64_t    retaddr;    // interrupt return address.
+	uint64_t    cs;         // code segment.
+	uint64_t    rflags;     // flags register.
+	uint64_t    rsp;        // stack pointer.
+	uint64_t    ss;         // stack segment.
 };
 #pragma pack(pop)
 
 typedef struct interrupt_context interrupt_context_t;
 
 typedef void(*isr_t)(interrupt_context_t *context);
-void register_interrupt_handler(uint8 interrupt, isr_t handler);
+void register_interrupt_handler(uint8_t interrupt, isr_t handler);
 
-void mask_irq(uint8);
-void unmask_irq(uint8);
+void mask_irq(uint8_t irq_no);
+void unmask_irq(uint8_t irq_no);
 void init_handlers(void);
-void panic();
+void panic(interrupt_context_t *context);

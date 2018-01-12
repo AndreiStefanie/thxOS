@@ -6,7 +6,7 @@ void init_pics(int pic1, int pic2)
 	unsigned char temp1, temp2;
 	temp1 = __inbyte(PIC1DATA);
 	temp2 = __inbyte(PIC2DATA);
-	
+
 	// send ICW1
 	__outbyte(PIC1, ICW1);
 	__outbyte(PIC2, ICW1);

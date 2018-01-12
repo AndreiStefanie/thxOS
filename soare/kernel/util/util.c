@@ -1,7 +1,7 @@
 #include "util.h"
 #include "boot.h"
 
-void* set_mem(void* dest, char val, uint32 len)
+void* set_mem(void* dest, char val, uint32_t len)
 {
 	char *temp = (char *)dest;
 
@@ -9,14 +9,14 @@ void* set_mem(void* dest, char val, uint32 len)
 	{
 		*temp++ = val;
 	}
-		
+
 	return dest;
 }
 
-int itoa_cust(int i, char *buf)
+int itoa_cust(int64_t i, char *buf)
 {
 	char const digit[] = "0123456789";
-	int shifter = 0;
+	int64_t shifter = 0;
 	int digits = 0;
 
 	if (i < 0)

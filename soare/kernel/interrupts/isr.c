@@ -1,5 +1,5 @@
 #include "isr.h"
-#include "../screen.h"
+#include "screen.h"
 #include "pic.h"
 
 isr_t interrupt_handlers[256];
@@ -30,7 +30,7 @@ static void empty_handler(interrupt_context_t *context)
 		"#XM: SIMD floating-point",
 		"#VE: Virtualization",
 	};
-	
+
 	ClearScreen();
 	SetColor(VGA_WHITE);
 	PrintString("Unhandled exception: ");
@@ -47,7 +47,7 @@ void init_handlers()
 	}
 }
 
-void register_interrupt_handler(uint8 interrupt, isr_t handler)
+void register_interrupt_handler(uint8_t interrupt, isr_t handler)
 {
 	interrupt_handlers[interrupt] = handler;
 }
@@ -59,7 +59,7 @@ void isr_handler(interrupt_context_t *context)
 }
 
 void irq_handler(interrupt_context_t *context)
-{	
+{
 	// Send an EOI (end of interrupt) signal to the PICs.
 	if (0x28 <= context->int_no)
 	{
@@ -73,11 +73,11 @@ void irq_handler(interrupt_context_t *context)
 	isr_handler(context);
 }
 
-void mask_irq(uint8 irq)
+void mask_irq(uint8_t irq)
 {
-	uint8 value;
-	uint16 port;
-	
+	uint8_t value;
+	uint16_t port;
+
 	if (ALL == irq)
 	{
 		port = PIC1DATA;
@@ -101,11 +101,11 @@ void mask_irq(uint8 irq)
 	__outbyte(port, value);
 }
 
-void unmask_irq(uint8 irq)
+void unmask_irq(uint8_t irq)
 {
-	uint8 value;
-	uint16 port;
-	
+	uint8_t value;
+	uint16_t port;
+
 	if (ALL == irq)
 	{
 		port = PIC1DATA;
@@ -141,13 +141,13 @@ void panic(interrupt_context_t *context)
 		"cs", "rflags",
 		"rsp", "ss"
 	};
-	
-	uint64 *addr = &context->regs.rax;
+
+	uint64_t *addr = &context->regs.rax;
 	for (size_t i = 0; i < 21; i++)
 	{
 		PrintString(int_frame_desc[i]);
 		PrintString(": ");
-		PrintInt((int)*addr);
+		PrintInt(*addr);
 		PrintChar('\n');
 
 		++addr;

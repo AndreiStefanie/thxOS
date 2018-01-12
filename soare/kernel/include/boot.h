@@ -1,5 +1,4 @@
 #pragma once
-
 #include "defs.h"
 #include <intrin.h>
 
@@ -70,4 +69,4 @@ typedef struct _MULTIBOOT_INFO
 extern void __cli(void);
 extern void __sti(void);
 extern void __magic(void);
-extern void __lidt(uint64);
+extern void __lidt(uint64_t idt_pointer);
